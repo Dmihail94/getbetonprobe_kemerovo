@@ -29,6 +29,9 @@
 <input name="count" required="" style="width: 300px; padding: 8px; font-size: 14px;" type="number"/>
 <button style="width: 300px; padding: 8px; font-size: 14px;" type="submit">Сформировать PDF</button>
 </form>
+<div id="loader" style="display: none; margin-top: 10px; font-size: 14px; text-align: center;">
+  Создание PDF, пожалуйста подождите...
+</div>
 <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbzEXVFdTPyH1Io8mAiTHrc-XNSQdj8xu8u6MGHtTyAQQcJ_SyHNjXWb3aTuTS61JHtNLw/exec";
 
@@ -37,6 +40,10 @@
 
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
+        const submitButton = form.querySelector("button[type='submit']");
+        submitButton.disabled = true;
+        submitButton.textContent = "Создаётся...";
+        document.getElementById("loader").style.display = "block";
 
         const data = {
           date: form.date.value,
@@ -47,7 +54,14 @@
           element: form.element.value,
           count: parseInt(form.count.value)
         };
-
+        if (data.count > 50) {
+        alert("Максимальное количество образцов — 50.");
+        submitButton.disabled = false;
+        submitButton.textContent = "Сформировать PDF";
+        document.getElementById("loader").style.display = "none";
+        return;
+            
+        }
         let codes = [];
           try {
               const response = await fetch(scriptURL, {
@@ -162,6 +176,10 @@ drawField("Представитель заказчика:", "________________/__
 drawField("Представитель поставщика:", "________________/_______________________");
 
 pdf.save("Образцы.pdf");
+
+submitButton.disabled = false;
+submitButton.textContent = "Сформировать PDF";
+document.getElementById("loader").style.display = "none";
 
 act.save("Акт_отбора.pdf");
 
